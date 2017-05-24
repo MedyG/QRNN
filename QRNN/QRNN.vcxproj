@@ -139,6 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="mnist_reader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="t10k-images.idx3-ubyte" />
+    <None Include="train-images.idx3-ubyte" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
