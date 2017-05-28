@@ -135,11 +135,10 @@ void mnist_test(double q) {
 	cout << "read mnist data..." << endl;
 	string filename_train = "train-images.idx3-ubyte";
 	string filename_train_label = "train-labels.idx1-ubyte";
-	int number_of_training_images = 60000;
-	int n_rows = 28;
-	int n_cols = 28;
-	read_mnist_images(filename_train, train_data, number_of_training_images, n_rows, n_cols);
+	read_mnist_images(filename_train, train_data);
 	read_Mnist_Label(filename_train_label, train_label);
+
+	int number_of_training_images = train_data.size();
 
 	VectorXd v_target = VectorXd(train_label.size());
 	for (int i = 0; i < train_data.size(); i++) {
@@ -194,7 +193,7 @@ void mnist_test(double q) {
 	int number_of_test_images = 10000;
 	int t_n_rows = 28;
 	int t_n_cols = 28;
-	read_mnist_images(filename_test, test_data, number_of_test_images, t_n_rows, t_n_cols);
+	read_mnist_images(filename_test, test_data);
 	read_Mnist_Label(filename_test_label, test_label);
 
 	VectorXd t_v_target = VectorXd(test_label.size());
@@ -228,8 +227,21 @@ void test() {
 
 int main() {
 	//¸ÄÕâ¸öq
-    double q = 1.5;
-	linear_test(q);
-	mnist_test(q);
+    double q = 1.9;
+	//fstream file;
+	//file.open();
+	//linear_test(q);
+	//mnist_test(q);
 	//test();
+	vector<vector<double>> test_data;
+	string filename_test = "t10k-images.idx3-ubyte";
+	string filename_test_label = "t10k-labels.idx1-ubyte";
+	int number_of_test_images = 10000;
+	int t_n_rows = 28;
+	int t_n_cols = 28;
+	read_mnist_images(filename_test, test_data);
+	cout << test_data.size();
+	//for (int i = 0; )
+
+	return 0;
 }

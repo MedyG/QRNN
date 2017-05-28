@@ -25,10 +25,13 @@ namespace mnist {
 		return((int)ch1 << 24) + ((int)ch2 << 16) + ((int)ch3 << 8) + ch4;
 	}
 
-	void read_mnist_images(string filename, vector<vector<double>> &vec, int number_of_images, int n_rows, int n_cols) {
+	void read_mnist_images(string filename, vector<vector<double>> &vec) {
 		ifstream file(filename, ios::binary);
 		if (file.is_open()) {
-			int magic_number = 0x803;
+			int magic_number = 0;
+			int number_of_images = 0;
+			int n_rows = 0;
+			int n_cols = 0;
 			file.read((char*)&magic_number, sizeof(magic_number));
 			magic_number = ReverseInt(magic_number);
 			file.read((char*)&number_of_images, sizeof(number_of_images));
