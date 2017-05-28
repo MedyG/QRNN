@@ -65,7 +65,8 @@ namespace mnist {
 			for (int i = 0; i < number_of_images; ++i) {
 				unsigned char temp = 0;
 				file.read((char*)&temp, sizeof(temp));
-				vec[i] = (double)temp;
+				//vec[i] = (double)temp;
+				vec.push_back(double(temp));
 			}
 		}
 	}
