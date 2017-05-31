@@ -11,7 +11,7 @@
 using namespace std;
 using namespace mnist;
 
-void linear_test(double q) {
+void linear_test(double q, double alpha) {
     srand((int)time(0));
     //样本数目
     int sample_num = 60000;
@@ -20,7 +20,7 @@ void linear_test(double q) {
     int factor_num = 64;
     //q熵索引
     //隐藏层数目
-    int L = 64;
+    int L = 32;
 
     cout << "Data initializing..." << endl;
     vector<double> weights;
@@ -70,7 +70,7 @@ void linear_test(double q) {
     
     
     cout << "Regression Network training start..." << endl;
-    RegressionLayer rgl = RegressionLayer(L, 0.15);
+    RegressionLayer rgl = RegressionLayer(L, alpha);
     
     // training start
     double loss = -1;
@@ -78,50 +78,50 @@ void linear_test(double q) {
     int times = 0;
     double last_loss = 1000000.0;
     while ((loss == -1 || loss > 1000.0)) {
-            VectorXd outputs = rgl.forwardPropagation(h);
-            loss = rgl.getLoss(outputs, v_target);
-            //cout << "# batch: " << i << " finished   loss: " << loss << endl;
-            cout << " finished   loss: " << loss << endl;
-            rgl.backwardPropagation(h, outputs, v_target);
-        if (loss >= last_loss) {
+        VectorXd outputs = rgl.forwardPropagation(h);
+        loss = rgl.getLoss(outputs, v_target);
+        cout << " finished   loss: " << loss << endl;
+        rgl.backwardPropagation(h, outputs, v_target);
+        if (last_loss - loss < 0.0001) {
             times++;
         }
-        if (times > 1000) {
+        if (times > 10) {
             break;
         }
+		last_loss = loss;
     }
+	cout <<"last loss:" << loss << endl;
 
 
-
-	//// test start
-	//ofstream myfile("linearoutput.txt", ios::out);
-	//vector<vector<double>> inputs;
-	//vector<double> targets;
-	//for (int i = 0; i < 100; i++) {
-	//	vector<double> temp;
-	//	// 10 data in every sample, data in range (0, 10)
-	//	for (int j = 0; j < factor_num; j++) {
-	//		temp.push_back(double(Myrandom(10)));
-	//	}
-	//	inputs.push_back(temp);
-	//	double sum = 0;
-	//	for (int l = 0; l < factor_num; l++) {
-	//		sum += weights[l] * temp[l];
-	//	}
-	//	targets.push_back(sum);
-	//}
-	//MatrixXd inputs2 = rl.getSampleH(inputs);
-	//VectorXd result = rgl.forwardPropagation(inputs2);
-	//for (int i = 0; i < 100; i++) {
-	//	myfile << result(i) << endl;
-	//}
-	//myfile << endl;
-	//for (int i = 0; i < 100; i++) {
-	//	myfile << targets[i] << endl;
-	//}
-	//myfile.close();
+	// test start
+	ofstream myfile("linearoutput_q=" + to_string(q) + ".txt", ios::out);
+	myfile << loss << endl;
+	vector<vector<double>> inputs;
+	vector<double> targets;
+	for (int i = 0; i < 100; i++) {
+		vector<double> temp;
+		// 10 data in every sample, data in range (0, 10)
+		for (int j = 0; j < factor_num; j++) {
+			temp.push_back(double(Myrandom(10)));
+		}
+		inputs.push_back(temp);
+		double sum = 0;
+		for (int l = 0; l < factor_num; l++) {
+			sum += weights[l] * temp[l];
+		}
+		targets.push_back(sum);
+	}
+	MatrixXd inputs2 = rl.getSampleH(inputs);
+	VectorXd result = rgl.forwardPropagation(inputs2);
+	for (int i = 0; i < 100; i++) {
+		myfile << result(i) << endl;
+	}
+	myfile << endl;
+	for (int i = 0; i < 100; i++) {
+		myfile << targets[i] << endl;
+	}
+	myfile.close();
 }
-
 
 void mnist_test(double q) {
 	srand((int)time(0));
@@ -135,10 +135,11 @@ void mnist_test(double q) {
 	cout << "read mnist data..." << endl;
 	string filename_train = "train-images.idx3-ubyte";
 	string filename_train_label = "train-labels.idx1-ubyte";
+	int number_of_training_images = 60000;
+	int n_rows = 28;
+	int n_cols = 28;
 	read_mnist_images(filename_train, train_data);
 	read_Mnist_Label(filename_train_label, train_label);
-
-	int number_of_training_images = train_data.size();
 
 	VectorXd v_target = VectorXd(train_label.size());
 	for (int i = 0; i < train_data.size(); i++) {
@@ -166,24 +167,25 @@ void mnist_test(double q) {
 			VectorXd targets = v_target.block(begin, 0, length, 1);
 			VectorXd outputs = rgl.forwardPropagation(inputs);
 			loss = rgl.getLoss(outputs, targets);
-			cout << "# batch: " << i << " finished   loss: " << loss << endl;
 			//cout << " finished   loss: " << loss << endl;
 			rgl.backwardPropagation(inputs, outputs, targets);
-			if (loss >= last_loss) {
+			if (last_loss - loss < 0.00003) {
 				times++;
 			}
-			if (times > 1000) {
+			if (times > 10) {
 				break;
 			}
+			last_loss = loss;
 		}
 		if (is_end) {
 			break;
 		}
 	}
-
+	cout <<"last loss:" << loss << endl;
 	// Test 
 	cout << "test begin..." << endl;
 	ofstream myfile("mnistoutput.txt", ios::out);
+	myfile << loss << endl;
 	vector<vector<double>> test_data;
 	vector<double> test_label;
 
@@ -228,20 +230,8 @@ void test() {
 int main() {
 	//改这个q
     double q = 1.9;
-	//fstream file;
-	//file.open();
-	//linear_test(q);
-	//mnist_test(q);
-	//test();
-	vector<vector<double>> test_data;
-	string filename_test = "t10k-images.idx3-ubyte";
-	string filename_test_label = "t10k-labels.idx1-ubyte";
-	int number_of_test_images = 10000;
-	int t_n_rows = 28;
-	int t_n_cols = 28;
-	read_mnist_images(filename_test, test_data);
-	cout << test_data.size();
-	//for (int i = 0; )
-
+	double alpha = 0.16;
+	linear_test(q, alpha);
+	mnist_test(q);
 	return 0;
 }
